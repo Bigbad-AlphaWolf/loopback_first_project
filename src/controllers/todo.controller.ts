@@ -1,3 +1,4 @@
+import {inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -7,23 +8,26 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  HttpErrors,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
 import {Todo} from '../models';
 import {TodoRepository} from '../repositories';
+import {Geocoder} from '../services';
 
 export class TodoController {
   constructor(
     @repository(TodoRepository)
-    public todoRepository : TodoRepository,
+    public todoRepository: TodoRepository,
+    @inject('services.Geocoder') protected geoService: Geocoder,
   ) {}
 
   @post('/todos')
@@ -44,6 +48,22 @@ export class TodoController {
     })
     todo: Omit<Todo, 'id'>,
   ): Promise<Todo> {
+    if (todo.remindAtAddress) {
+      const geo = await this.geoService.geocode(todo.remindAtAddress);
+
+      if (!geo[0]) {
+        // address not found
+        throw new HttpErrors.BadRequest(
+          `Address not found: ${todo.remindAtAddress}`,
+        );
+      }
+
+      // Encode the coordinates as "lat,lng" (Google Maps API format). See also
+      // https://stackoverflow.com/q/7309121/69868
+      // https://gis.stackexchange.com/q/7379
+      todo.remindAtGeo = `${geo[0].y},${geo[0].x}`;
+    }
+
     return this.todoRepository.create(todo);
   }
 
@@ -52,9 +72,7 @@ export class TodoController {
     description: 'Todo model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Todo) where?: Where<Todo>,
-  ): Promise<Count> {
+  async count(@param.where(Todo) where?: Where<Todo>): Promise<Count> {
     return this.todoRepository.count(where);
   }
 
@@ -70,9 +88,7 @@ export class TodoController {
       },
     },
   })
-  async find(
-    @param.filter(Todo) filter?: Filter<Todo>,
-  ): Promise<Todo[]> {
+  async find(@param.filter(Todo) filter?: Filter<Todo>): Promise<Todo[]> {
     return this.todoRepository.find(filter);
   }
 
@@ -106,7 +122,7 @@ export class TodoController {
   })
   async findById(
     @param.path.number('id') id: number,
-    @param.filter(Todo, {exclude: 'where'}) filter?: FilterExcludingWhere<Todo>
+    @param.filter(Todo, {exclude: 'where'}) filter?: FilterExcludingWhere<Todo>,
   ): Promise<Todo> {
     return this.todoRepository.findById(id, filter);
   }
