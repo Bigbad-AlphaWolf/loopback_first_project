@@ -1,6 +1,8 @@
 {
   "ids": {
-    "Todo": 8
+    "Todo": 8,
+    "User": 2,
+    "UserCredentials": 2
   },
   "models": {
     "Todo": {
@@ -11,6 +13,12 @@
       "5": "{\"title\":\"Elemeng\",\"id\":5}",
       "6": "{\"title\":\"2e\",\"remindAtAddress\":\"1600 Pennsylvania Avenue, Washington, DC\",\"remindAtGeo\":\"38.898754,-77.03535\",\"id\":6}",
       "7": "{\"title\":\"string\",\"desc\":\"string\",\"isComplete\":true,\"id\":7}"
+    },
+    "User": {
+      "2dcc9234-a35d-4037-a02a-d98b06d1af1e": "{\"id\":\"2dcc9234-a35d-4037-a02a-d98b06d1af1e\",\"username\":\"root\",\"email\":\"root@root.sn\"}"
+    },
+    "UserCredentials": {
+      "ebeef24f-8675-4c38-a45b-6b87e28cbe9e": "{\"id\":\"ebeef24f-8675-4c38-a45b-6b87e28cbe9e\",\"password\":\"$2a$10$ChEpzE1raAfUMDibVEqmK.xO/4b.mDeA5udHpxT1wAm3BeGrD2CQa\",\"userId\":\"2dcc9234-a35d-4037-a02a-d98b06d1af1e\"}"
     }
   }
 }
